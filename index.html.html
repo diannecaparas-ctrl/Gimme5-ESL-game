@@ -1,0 +1,1039 @@
+<!--
+IMPORTANT SETUP:
+
+Put ALL these files in the SAME folder:
+
+1. gimme5.html
+2. game 1.mp3
+3. nice.mp3
+4. great.mp3
+5. fantastic.mp3
+6. amazing.mp3
+
+VERY IMPORTANT:
+Use EXACT filenames above.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>GIMME 5</title>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    overflow:hidden;
+    min-height:100vh;
+
+    background:
+    linear-gradient(
+        135deg,
+        #ff7b00,
+        #ffb300,
+        #0099ff,
+        #00c853
+    );
+
+    color:white;
+}
+
+.app{
+    width:100%;
+    height:100vh;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+
+    padding:20px;
+}
+
+h1{
+    margin-top:10px;
+
+    font-size:4rem;
+    font-weight:900;
+
+    letter-spacing:6px;
+
+    text-shadow:
+    4px 4px 12px rgba(0,0,0,0.3);
+}
+
+/* =========================
+TOP CONTROLS
+========================= */
+
+.top-controls{
+    width:100%;
+    max-width:1500px;
+
+    margin-top:15px;
+    margin-bottom:15px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+.page-buttons{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+button{
+    border:none;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.nav-btn,
+.reset-btn{
+    background:white;
+    color:#222;
+
+    padding:12px 22px;
+
+    border-radius:14px;
+
+    font-size:1rem;
+    font-weight:bold;
+
+    box-shadow:
+    0 5px 12px rgba(0,0,0,0.25);
+}
+
+.nav-btn:hover,
+.reset-btn:hover{
+    transform:
+    translateY(-2px)
+    scale(1.03);
+}
+
+/* =========================
+AUDIO CONTROLS
+========================= */
+
+.audio-controls{
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    background:
+    rgba(255,255,255,0.2);
+
+    padding:12px 18px;
+
+    border-radius:16px;
+
+    backdrop-filter: blur(6px);
+}
+
+.audio-controls input{
+    width:140px;
+}
+
+/* =========================
+CARDS
+========================= */
+
+.cards-container{
+    width:100%;
+    max-width:1500px;
+
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+
+    gap:22px;
+}
+
+.card{
+    position:relative;
+
+    background:white;
+    color:#222;
+
+    height:130px;
+
+    border-radius:24px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:20px 25px;
+
+    cursor:pointer;
+
+    overflow:hidden;
+
+    box-shadow:
+    0 10px 18px rgba(0,0,0,0.25);
+
+    transition:0.25s;
+}
+
+.card:hover{
+    transform:scale(1.03);
+}
+
+.card-left{
+    width:70%;
+
+    display:flex;
+    flex-direction:column;
+
+    gap:8px;
+}
+
+.letter{
+    font-size:2.7rem;
+    font-weight:900;
+    color:#ff5e00;
+}
+
+.tap-text{
+    font-size:0.9rem;
+    color:#444;
+    line-height:1.2;
+}
+
+.icon{
+    font-size:4rem;
+}
+
+.sold-overlay{
+    position:absolute;
+    inset:0;
+
+    background:
+    rgba(0,0,0,0.8);
+
+    display:none;
+    align-items:center;
+    justify-content:center;
+
+    color:white;
+
+    font-size:2.5rem;
+    font-weight:900;
+
+    letter-spacing:4px;
+
+    z-index:5;
+}
+
+.card.sold{
+    pointer-events:none;
+    filter:grayscale(100%);
+}
+
+.card.sold .sold-overlay{
+    display:flex;
+}
+
+/* =========================
+QUESTION SCREEN
+========================= */
+
+.question-screen{
+    position:fixed;
+    inset:0;
+
+    background:
+    linear-gradient(
+        135deg,
+        #001f54,
+        #00509d
+    );
+
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+
+    text-align:center;
+
+    padding:40px;
+
+    z-index:500;
+}
+
+.question-letter{
+    font-size:7rem;
+    font-weight:900;
+
+    color:#ffcc00;
+
+    margin-bottom:20px;
+}
+
+.question-text{
+    font-size:3rem;
+    font-weight:bold;
+
+    max-width:1200px;
+
+    line-height:1.3;
+}
+
+/* =========================
+FEEDBACK BUTTONS
+========================= */
+
+.feedback-buttons{
+    margin-top:40px;
+
+    display:flex;
+    flex-wrap:wrap;
+    gap:20px;
+
+    justify-content:center;
+}
+
+.feedback-btn{
+    min-width:190px;
+
+    padding:18px 30px;
+
+    color:white;
+
+    font-size:1.4rem;
+    font-weight:bold;
+
+    border-radius:18px;
+
+    box-shadow:
+    0 8px 15px rgba(0,0,0,0.25);
+}
+
+.feedback-btn:hover{
+    transform:
+    translateY(-3px)
+    scale(1.03);
+}
+
+.feedback-btn:active{
+    transform:scale(0.95);
+}
+
+.nice{
+    background:#00c853;
+}
+
+.great{
+    background:#2196f3;
+}
+
+.fantastic{
+    background:#ff9800;
+}
+
+.amazing{
+    background:#ff1744;
+}
+
+/* =========================
+BACK BUTTON
+========================= */
+
+.back-btn{
+    margin-top:35px;
+
+    padding:18px 34px;
+
+    background:white;
+    color:#222;
+
+    font-size:1.3rem;
+    font-weight:bold;
+
+    border-radius:18px;
+}
+
+/* =========================
+WELCOME SCREEN
+========================= */
+
+.welcome-screen{
+    position:fixed;
+    inset:0;
+
+    background:
+    rgba(0,0,0,0.92);
+
+    z-index:9999;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+
+    text-align:center;
+
+    padding:20px;
+}
+
+.welcome-screen h2{
+    font-size:5rem;
+    margin-bottom:20px;
+}
+
+.welcome-screen p{
+    font-size:1.5rem;
+    color:#ddd;
+
+    margin-bottom:40px;
+}
+
+.start-btn{
+    background:#ffcc00;
+    color:#222;
+
+    padding:22px 50px;
+
+    border-radius:24px;
+
+    font-size:2rem;
+    font-weight:900;
+
+    box-shadow:
+    0 8px 18px rgba(0,0,0,0.4);
+}
+
+.start-btn:hover{
+    transform:scale(1.05);
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- =========================
+WELCOME SCREEN
+========================= -->
+
+<div class="welcome-screen" id="welcomeScreen">
+
+    <h2>GIMME 5</h2>
+
+    <p>
+        Ultimate Classroom Challenge
+    </p>
+
+    <button class="start-btn" id="startGameBtn">
+        START GAME
+    </button>
+
+</div>
+
+<!-- =========================
+MAIN APP
+========================= -->
+
+<div class="app">
+
+    <h1>GIMME 5</h1>
+
+    <div class="top-controls">
+
+        <div class="page-buttons">
+
+            <button class="nav-btn" onclick="showPage(1)">
+                A - I
+            </button>
+
+            <button class="nav-btn" onclick="showPage(2)">
+                J - R
+            </button>
+
+            <button class="nav-btn" onclick="showPage(3)">
+                S - Z
+            </button>
+
+            <button class="reset-btn" id="reset-btn">
+                Reset Game
+            </button>
+
+        </div>
+
+        <div class="audio-controls">
+
+            <button class="nav-btn" id="muteBtn">
+                Mute
+            </button>
+
+            <input
+                type="range"
+                id="volumeSlider"
+                min="0"
+                max="1"
+                step="0.01"
+                value="0.25"
+            >
+
+        </div>
+
+    </div>
+
+    <div class="cards-container" id="cardsContainer"></div>
+
+</div>
+
+<!-- =========================
+QUESTION SCREEN
+========================= -->
+
+<div class="question-screen" id="questionScreen">
+
+    <div class="question-letter" id="questionLetter">
+        A
+    </div>
+
+    <div class="question-text" id="questionText">
+        Question Here
+    </div>
+
+    <div class="feedback-buttons">
+
+        <button
+            class="feedback-btn nice"
+            onclick="playFeedback('nice')"
+        >
+            Nice!
+        </button>
+
+        <button
+            class="feedback-btn great"
+            onclick="playFeedback('great')"
+        >
+            Great!
+        </button>
+
+        <button
+            class="feedback-btn fantastic"
+            onclick="playFeedback('fantastic')"
+        >
+            Fantastic!
+        </button>
+
+        <button
+            class="feedback-btn amazing"
+            onclick="playFeedback('amazing')"
+        >
+            Amazing!
+        </button>
+
+    </div>
+
+    <button class="back-btn" onclick="returnToMenu()">
+        BACK TO MENU
+    </button>
+
+</div>
+
+<script>
+
+/* =========================
+AUDIO FILES
+========================= */
+
+const bgMusic =
+new Audio("./game 1.mp3");
+
+bgMusic.loop = true;
+bgMusic.volume = 0.25;
+bgMusic.preload = "auto";
+
+const soundEffects = {
+
+    nice:
+    new Audio("./nice.mp3"),
+
+    great:
+    new Audio("./great.mp3"),
+
+    fantastic:
+    new Audio("./fantastic.mp3"),
+
+    amazing:
+    new Audio("./amazing.mp3")
+
+};
+
+Object.values(soundEffects).forEach(sound=>{
+
+    sound.preload = "auto";
+    sound.volume = 1;
+
+});
+
+/* =========================
+DATA
+========================= */
+
+const challenges = [
+
+    {letter:"A", icon:"🍔", text:"Give me 5 animals that can fly."},
+    {letter:"B", icon:"🍟", text:"Give me 5 countries in Asia."},
+    {letter:"C", icon:"🌭", text:"Give me 5 things found in a classroom."},
+    {letter:"D", icon:"🍕", text:"Give me 5 fruits that are yellow or orange."},
+    {letter:"E", icon:"🌮", text:"Give me 5 sports played with a ball."},
+    {letter:"F", icon:"🍩", text:"Give me 5 things you bring to school."},
+    {letter:"G", icon:"🍦", text:"Give me 5 things people do before sleeping."},
+    {letter:"H", icon:"🍗", text:"Give me 5 parts of the body."},
+    {letter:"I", icon:"🥤", text:"Give me 5 jobs or professions."},
+
+    {letter:"J", icon:"🍉", text:"Give me 5 things that are cold."},
+    {letter:"K", icon:"🍇", text:"Give me 5 school subjects."},
+    {letter:"L", icon:"🥪", text:"Give me 5 words that begin with the letter 'S'."},
+    {letter:"M", icon:"🍓", text:"Give me 5 drinks."},
+    {letter:"N", icon:"🍪", text:"Give me 5 vegetables."},
+    {letter:"O", icon:"🍜", text:"Give me 5 things you can find in the kitchen."},
+    {letter:"P", icon:"🍰", text:"Give me 5 superheroes or fictional characters."},
+    {letter:"Q", icon:"🍫", text:"Give me 5 countries with red in their flag."},
+    {letter:"R", icon:"🍤", text:"Give me 5 things you use every day."},
+
+    {letter:"S", icon:"🍿", text:"Give me 5 verbs/action words."},
+    {letter:"T", icon:"🥞", text:"Give me 5 things that make people happy."},
+    {letter:"U", icon:"🍹", text:"Give me 5 electronic gadgets."},
+    {letter:"V", icon:"🍡", text:"Give me 5 things you can do during summer vacation."},
+    {letter:"W", icon:"🧃", text:"Give me 5 words related to the ocean."},
+    {letter:"X", icon:"🍊", text:"Give me 5 things that are round."},
+    {letter:"Y", icon:"🍒", text:"Give me 5 things you can see in the sky."},
+    {letter:"Z", icon:"🍖", text:"Give me 5 big animals."}
+
+];
+
+/* =========================
+ELEMENTS
+========================= */
+
+const cardsContainer =
+document.getElementById("cardsContainer");
+
+const questionScreen =
+document.getElementById("questionScreen");
+
+const questionText =
+document.getElementById("questionText");
+
+const questionLetter =
+document.getElementById("questionLetter");
+
+const volumeSlider =
+document.getElementById("volumeSlider");
+
+const muteBtn =
+document.getElementById("muteBtn");
+
+/* =========================
+VARIABLES
+========================= */
+
+let currentCard = null;
+let soldOutCards = [];
+
+/* =========================
+SHOW PAGE
+========================= */
+
+function showPage(pageNumber){
+
+    cardsContainer.innerHTML = "";
+
+    let startIndex = 0;
+    let endIndex = 9;
+
+    if(pageNumber === 2){
+
+        startIndex = 9;
+        endIndex = 18;
+
+    }
+
+    if(pageNumber === 3){
+
+        startIndex = 18;
+        endIndex = 26;
+
+    }
+
+    const pageItems =
+    challenges.slice(startIndex,endIndex);
+
+    pageItems.forEach(item=>{
+
+        const card =
+        document.createElement("div");
+
+        card.className = "card";
+
+        card.dataset.letter = item.letter;
+
+        if(soldOutCards.includes(item.letter)){
+
+            card.classList.add("sold");
+
+        }
+
+        card.innerHTML = `
+
+            <div class="card-left">
+
+                <div class="letter">
+                    ${item.letter}
+                </div>
+
+                <div class="tap-text">
+                    Tap to reveal your challenge
+                </div>
+
+            </div>
+
+            <div class="icon">
+                ${item.icon}
+            </div>
+
+            <div class="sold-overlay">
+                SOLD OUT
+            </div>
+
+        `;
+
+        card.addEventListener("click",()=>{
+
+            openQuestion(item,card);
+
+        });
+
+        cardsContainer.appendChild(card);
+
+    });
+
+}
+
+/* =========================
+OPEN QUESTION
+========================= */
+
+function openQuestion(item,card){
+
+    currentCard = card;
+
+    questionLetter.textContent =
+    item.letter;
+
+    questionText.textContent =
+    item.text;
+
+    questionScreen.style.display =
+    "flex";
+
+}
+
+/* =========================
+RETURN TO MENU
+========================= */
+
+function returnToMenu(){
+
+    questionScreen.style.display =
+    "none";
+
+    if(currentCard){
+
+        const letter =
+        currentCard.dataset.letter;
+
+        if(!soldOutCards.includes(letter)){
+
+            soldOutCards.push(letter);
+
+        }
+
+        currentCard.classList.add("sold");
+
+    }
+
+}
+
+/* =========================
+RESET GAME
+========================= */
+
+function resetGame(){
+
+    soldOutCards = [];
+
+    document
+    .querySelectorAll(".card")
+    .forEach(card=>{
+
+        card.classList.remove("sold");
+
+    });
+
+    questionScreen.style.display =
+    "none";
+
+}
+
+/* =========================
+CONFETTI EFFECTS
+========================= */
+
+function smallConfetti(){
+
+    confetti({
+
+        particleCount:50,
+        spread:60,
+
+        origin:{ y:0.7 },
+
+        colors:[
+            "#00c853",
+            "#69f0ae"
+        ],
+
+        zIndex:9999
+
+    });
+
+}
+
+function mediumConfetti(){
+
+    confetti({
+
+        particleCount:100,
+        spread:85,
+
+        origin:{ y:0.65 },
+
+        colors:[
+            "#2196f3",
+            "#ffeb3b",
+            "#ffffff"
+        ],
+
+        zIndex:9999
+
+    });
+
+}
+
+function largeConfetti(){
+
+    confetti({
+
+        particleCount:220,
+        spread:120,
+
+        origin:{ y:0.6 },
+
+        colors:[
+            "#ff1744",
+            "#ffea00",
+            "#2979ff",
+            "#00e676",
+            "#ffffff"
+        ],
+
+        zIndex:9999
+
+    });
+
+}
+
+function amazingConfetti(){
+
+    const duration = 2500;
+    const end = Date.now() + duration;
+
+    (function frame(){
+
+        confetti({
+
+            particleCount:14,
+            angle:60,
+            spread:85,
+
+            origin:{
+                x:0,
+                y:1
+            },
+
+            zIndex:9999
+
+        });
+
+        confetti({
+
+            particleCount:14,
+            angle:120,
+            spread:85,
+
+            origin:{
+                x:1,
+                y:1
+            },
+
+            zIndex:9999
+
+        });
+
+        if(Date.now() < end){
+
+            requestAnimationFrame(frame);
+
+        }
+
+    })();
+
+}
+
+/* =========================
+PLAY FEEDBACK
+========================= */
+
+function playFeedback(type){
+
+    try{
+
+        const sound =
+        soundEffects[type];
+
+        if(sound){
+
+            sound.pause();
+
+            sound.currentTime = 0;
+
+            sound.play();
+
+        }
+
+        if(type === "nice"){
+
+            smallConfetti();
+
+        }
+
+        if(type === "great"){
+
+            mediumConfetti();
+
+        }
+
+        if(type === "fantastic"){
+
+            largeConfetti();
+
+        }
+
+        if(type === "amazing"){
+
+            amazingConfetti();
+
+        }
+
+    }catch(error){
+
+        console.log(error);
+
+    }
+
+}
+
+/* =========================
+AUDIO CONTROLS
+========================= */
+
+volumeSlider.addEventListener("input",()=>{
+
+    bgMusic.volume =
+    volumeSlider.value;
+
+});
+
+muteBtn.addEventListener("click",()=>{
+
+    bgMusic.muted =
+    !bgMusic.muted;
+
+    muteBtn.textContent =
+    bgMusic.muted
+    ? "Unmute"
+    : "Mute";
+
+});
+
+/* =========================
+START GAME
+========================= */
+
+document
+.getElementById("startGameBtn")
+.addEventListener("click", async ()=>{
+
+    try{
+
+        /* FORCE AUDIO UNLOCK */
+
+        await bgMusic.play();
+
+        /* HIDE OVERLAY */
+
+        document
+        .getElementById("welcomeScreen")
+        .style.display = "none";
+
+    }catch(error){
+
+        console.error(error);
+
+        alert(
+            "Audio failed to load. Make sure all MP3 files are in the same folder."
+        );
+
+    }
+
+});
+
+/* =========================
+RESET BUTTON
+========================= */
+
+document
+.getElementById("reset-btn")
+.addEventListener("click",resetGame);
+
+/* =========================
+INITIAL LOAD
+========================= */
+
+showPage(1);
+
+</script>
+
+</body>
+</html>
